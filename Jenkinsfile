@@ -41,32 +41,32 @@ pipeline {
                 stage('Test PathPredictor') {
                     steps {
                         dir("${PATH_PREDICTOR_DIR}") {
-                            echo 'Running PathPredictor tests in Docker...'
-                            sh 'docker run --rm -v $(pwd):/app -w /app python:3.12-slim sh -c "pip install -r requirements.txt pytest && pytest"'
+                            echo 'Running PathPredictor tests...'
+                            sh 'pip3 install -r requirements.txt pytest --break-system-packages && pytest'
                         }
                     }
                 }
                 stage('Test PrepaData') {
                     steps {
                         dir("${PREPA_DATA_DIR}") {
-                            echo 'Running PrepaData tests in Docker...'
-                            sh 'docker run --rm -v $(pwd):/app -w /app python:3.11-slim sh -c "pip install -r requirements.txt pytest && pytest"'
+                            echo 'Running PrepaData tests...'
+                            sh 'pip3 install -r requirements.txt pytest --break-system-packages && pytest'
                         }
                     }
                 }
                 stage('Test RecoBuilder') {
                     steps {
                         dir("${RECO_BUILDER_DIR}") {
-                            echo 'Running RecoBuilder tests in Docker...'
-                            sh 'docker run --rm -v $(pwd):/app -w /app python:3.12-slim sh -c "pip install -r requirements.txt pytest && pytest"'
+                            echo 'Running RecoBuilder tests...'
+                            sh 'pip3 install -r requirements.txt pytest --break-system-packages && pytest'
                         }
                     }
                 }
                 stage('Test StudentProfiler') {
                     steps {
                         dir("${STUDENT_PROFILER_DIR}") {
-                            echo 'Running StudentProfiler tests in Docker...'
-                            sh 'docker run --rm -v $(pwd):/app -w /app python:3.12-slim sh -c "pip install -r requirements.txt pytest && pytest"'
+                            echo 'Running StudentProfiler tests...'
+                            sh 'pip3 install -r requirements.txt pytest --break-system-packages && pytest'
                         }
                     }
                 }
