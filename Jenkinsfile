@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        // Define directory paths for each service
         LMS_CONNECTOR_DIR = 'LMSConnector'
         PATH_PREDICTOR_DIR = 'path-predictor'
         PREPA_DATA_DIR = 'prepa-data'
@@ -14,73 +13,111 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Checkout the code (automatic in Jenkins jobs configured with SCM)
-                echo 'Checking out source code...'
                 checkout scm
+                echo 'Code source récupéré.'
             }
         }
 
-        stage('Build LMSConnector') {
+        stage('Preparation') {
             steps {
-                dir("${LMS_CONNECTOR_DIR}") {
-                    script {
-                        echo 'Building LMSConnector service...'
-                        sh 'docker build -t lms-connector:latest .'
+                script {
+                    echo 'Création des dossiers manquants pour RecoBuilder...'
+                    sh "mkdir -p ${RECO_BUILDER_DIR}/models ${RECO_BUILDER_DIR}/indexes"
+                    sh "touch ${RECO_BUILDER_DIR}/models/.gitkeep ${RECO_BUILDER_DIR}/indexes/.gitkeep"
+                }
+            }
+        }
+
+        stage('Tests') {
+            parallel {
+                stage('Test LMSConnector') {
+                    steps {
+                        dir("${LMS_CONNECTOR_DIR}") {
+                            echo 'Running LMSConnector tests...'
+                            sh 'npm install && npm test'
+                        }
+                    }
+                }
+                stage('Test PathPredictor') {
+                    steps {
+                        dir("${PATH_PREDICTOR_DIR}") {
+                            echo 'Running PathPredictor tests...'
+                            sh 'pip install -r requirements.txt && pytest'
+                        }
+                    }
+                }
+                stage('Test PrepaData') {
+                    steps {
+                        dir("${PREPA_DATA_DIR}") {
+                            echo 'Running PrepaData tests...'
+                            sh 'pip install -r requirements.txt && pytest'
+                        }
+                    }
+                }
+                stage('Test RecoBuilder') {
+                    steps {
+                        dir("${RECO_BUILDER_DIR}") {
+                            echo 'Running RecoBuilder tests...'
+                            sh 'pip install -r requirements.txt && pytest'
+                        }
+                    }
+                }
+                stage('Test StudentProfiler') {
+                    steps {
+                        dir("${STUDENT_PROFILER_DIR}") {
+                            echo 'Running StudentProfiler tests...'
+                            sh 'pip install -r requirements.txt && pytest'
+                        }
                     }
                 }
             }
         }
 
-        stage('Build PathPredictor') {
-            steps {
-                dir("${PATH_PREDICTOR_DIR}") {
-                    script {
-                        echo 'Building PathPredictor service...'
-                        sh 'docker build -t path-predictor:latest .'
+        stage('Build Services') {
+            when {
+                expression { currentBuild.result == null || currentBuild.result == 'SUCCESS' }
+            }
+            parallel {
+                stage('Build LMSConnector') {
+                    steps {
+                        dir("${LMS_CONNECTOR_DIR}") {
+                            sh 'docker build -t lms-connector:latest .'
+                        }
                     }
                 }
-            }
-        }
-
-        stage('Build PrepaData') {
-            steps {
-                dir("${PREPA_DATA_DIR}") {
-                    script {
-                        echo 'Building PrepaData service...'
-                        sh 'docker build -t prepa-data:latest .'
+                stage('Build PathPredictor') {
+                    steps {
+                        dir("${PATH_PREDICTOR_DIR}") {
+                            sh 'docker build -t path-predictor:latest .'
+                        }
                     }
                 }
-            }
-        }
-
-        stage('Build RecoBuilder') {
-            steps {
-                dir("${RECO_BUILDER_DIR}") {
-                    script {
-                        echo 'Building RecoBuilder service...'
-                        sh 'docker build -t reco-builder:latest .'
+                stage('Build PrepaData') {
+                    steps {
+                        dir("${PREPA_DATA_DIR}") {
+                            sh 'docker build -t prepa-data:latest .'
+                        }
                     }
                 }
-            }
-        }
-
-        stage('Build StudentCoach Backend') {
-            steps {
-                dir("${STUDENT_COACH_DIR}") {
-                    script {
-                        echo 'Building StudentCoach Backend service...'
-                        sh 'docker build -t student-coach-backend:latest .'
+                stage('Build RecoBuilder') {
+                    steps {
+                        dir("${RECO_BUILDER_DIR}") {
+                            sh 'docker build -t reco-builder:latest .'
+                        }
                     }
                 }
-            }
-        }
-
-        stage('Build StudentProfiler') {
-            steps {
-                dir("${STUDENT_PROFILER_DIR}") {
-                    script {
-                        echo 'Building StudentProfiler service...'
-                        sh 'docker build -t student-profiler:latest .'
+                stage('Build StudentCoach Backend') {
+                    steps {
+                        dir("${STUDENT_COACH_DIR}") {
+                            sh 'docker build -t student-coach-backend:latest .'
+                        }
+                    }
+                }
+                stage('Build StudentProfiler') {
+                    steps {
+                        dir("${STUDENT_PROFILER_DIR}") {
+                            sh 'docker build -t student-profiler:latest .'
+                        }
                     }
                 }
             }
@@ -88,20 +125,17 @@ pipeline {
 
         stage('Cleanup') {
             steps {
-                script {
-                    echo 'Cleaning up dangling images...'
-                    sh 'docker image prune -f'
-                }
+                sh 'docker image prune -f'
             }
         }
     }
 
     post {
         success {
-            echo 'Pipeline completed successfully! All services built.'
+            echo 'Pipeline completed successfully!'
         }
         failure {
-            echo 'Pipeline failed. Please check the logs.'
+            echo 'Pipeline failed. Check stage logs.'
         }
     }
 }
