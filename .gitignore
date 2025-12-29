@@ -1,0 +1,43 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# VS Code / IDE
+.vscode/
+.idea/
+*.iml
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.so
+.env
+.venv/
+venv/
+env/
+
+# Node / JS
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-store/
+dist/
+build/
+
+# Flutter / Dart
+.dart_tool/
+.packages
+build/
+android/.gradle/
+android/app/build/
+ios/Pods/
+
+# Teacher Console frontend
+teacher-console/frontend/node_modules/
+teacher-console/frontend/dist/
+teacher-console/frontend/.vite/
+
+# Project-specific heavy directories
+path-predictor/.venv/
