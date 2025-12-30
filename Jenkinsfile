@@ -29,7 +29,7 @@ pipeline {
         }
 
         stage('Tests') {
-            parallel {
+            stages {
                 stage('Test LMSConnector') {
                     steps {
                         dir("${LMS_CONNECTOR_DIR}") {
