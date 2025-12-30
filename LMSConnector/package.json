@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "name": "lmsconnector",
   "version": "0.1.0",
   "description": "Microservice LMSConnector: ingestion et normalisation depuis Moodle/Canvas/Blackboard vers PostgreSQL",
