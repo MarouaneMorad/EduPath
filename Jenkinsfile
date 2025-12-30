@@ -8,6 +8,8 @@ pipeline {
         RECO_BUILDER_DIR = 'reco-builder'
         STUDENT_COACH_DIR = 'student-coach/backend'
         STUDENT_PROFILER_DIR = 'student-profiler'
+        // Fix for Jest ESM support
+        NODE_OPTIONS = '--experimental-vm-modules'
     }
 
     stages {
@@ -42,7 +44,7 @@ pipeline {
                     steps {
                         dir("${PATH_PREDICTOR_DIR}") {
                             echo 'Running PathPredictor tests...'
-                            sh 'pip3 install -r requirements.txt pytest --break-system-packages && pytest'
+                            sh 'if [ -f requirements.txt ]; then pip3 install -r requirements.txt pytest --break-system-packages; fi && pytest'
                         }
                     }
                 }
@@ -50,7 +52,7 @@ pipeline {
                     steps {
                         dir("${PREPA_DATA_DIR}") {
                             echo 'Running PrepaData tests...'
-                            sh 'pip3 install -r requirements.txt pytest --break-system-packages && pytest'
+                            sh 'if [ -f requirements.txt ]; then pip3 install -r requirements.txt pytest --break-system-packages; fi && pytest'
                         }
                     }
                 }
@@ -58,7 +60,7 @@ pipeline {
                     steps {
                         dir("${RECO_BUILDER_DIR}") {
                             echo 'Running RecoBuilder tests...'
-                            sh 'pip3 install -r requirements.txt pytest --break-system-packages && pytest'
+                            sh 'if [ -f requirements.txt ]; then pip3 install -r requirements.txt pytest --break-system-packages; fi && pytest'
                         }
                     }
                 }
@@ -66,7 +68,7 @@ pipeline {
                     steps {
                         dir("${STUDENT_PROFILER_DIR}") {
                             echo 'Running StudentProfiler tests...'
-                            sh 'pip3 install -r requirements.txt pytest --break-system-packages && pytest'
+                            sh 'if [ -f requirements.txt ]; then pip3 install -r requirements.txt pytest --break-system-packages; fi && pytest'
                         }
                     }
                 }
@@ -139,3 +141,4 @@ pipeline {
         }
     }
 }
+

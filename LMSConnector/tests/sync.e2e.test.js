@@ -1,5 +1,12 @@
-import { syncMoodleSource } from "../src/services/sync.service.js";
 import { MoodleClient } from "../src/connectors/moodle.js";
+
+jest.unstable_mockModule("../src/db/pool.js", () => ({
+  getPool: () => ({
+    query: jest.fn().mockResolvedValue({ rows: [{ id: "job-1" }] }),
+  }),
+}));
+
+const { syncMoodleSource } = await import("../src/services/sync.service.js");
 
 jest.mock("../src/connectors/moodle.js");
 
@@ -51,12 +58,7 @@ MoodleClient.mockImplementation(() => ({
 }));
 
 test("syncMoodleSource processes records without throwing", async () => {
-  // Skip actual DB by monkey-patching getPool
-  jest.unstable_mockModule("../src/db/pool.js", () => ({
-    getPool: () => ({
-      query: jest.fn().mockResolvedValue({ rows: [{ id: "job-1" }] }),
-    }),
-  }));
   const source = { id: "src-1", base_url: "https://fake", token: "t" };
   await expect(syncMoodleSource(source)).resolves.toBeDefined();
 });
+
